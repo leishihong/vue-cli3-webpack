@@ -2,12 +2,22 @@
   <div id="app">
     <div id="nav">
       <router-link to="/">Home</router-link>
-      |
       <router-link to="/about">About</router-link>
     </div>
     <router-view />
+    <Button type="primary">12测试主题颜色紫色</Button>
   </div>
 </template>
+
+<script>
+import { fetchLogin, fetchResigner } from 'api/login'
+export default {
+  mounted() {
+    fetchLogin({ ceshi: 123 })
+    fetchResigner({ name: 123 })
+  }
+}
+</script>
 
 <style lang="scss">
 #app {

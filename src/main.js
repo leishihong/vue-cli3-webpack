@@ -1,7 +1,26 @@
 import Vue from 'vue'
+import { sync } from 'vuex-router-sync'
+import ViewUI from 'view-design'
+
 import App from './App.vue'
 import router from './router'
 import store from './store'
+
+import 'assets/reset.less'
+import './theme/iview.less'
+// import axios from 'lib/axios'
+import EventBus from 'lib/event-bus.js'
+
+// 国际化
+import i18n from './locale'
+// sync
+sync(store, router)
+
+// Vue.prototype.$http = axios
+Vue.use(EventBus)
+Vue.use(ViewUI, {
+  i18n: (key, value) => i18n.t(key, value)
+})
 
 Vue.config.productionTip = false
 

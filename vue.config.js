@@ -90,21 +90,38 @@ module.exports = {
   devServer: {
     // can be overwritten by process.env.HOST
     // host: '0.0.0.0',
-    // port: 8080,
+    // https: true, //TODO: 默认情况下，开发服务器将通过HTTP提供服务。可以选择使用HTTPS通过HTTP/2提供服务
+    hot: true, //TODO: 启用 webpack 的 Hot Module Replacement 功能
+    hotOnly: true, //TODO: 启用热模块替换
+    watchContentBase: true, //TODO: 启用后，文件更改将触发整个页面重新加载
+    overlay: true,
+    quiet: true, //TODO: 启用 devServer.quiet 后，除了初始启动信息外，什么都不会写入控制台。 这也意味着来自webpack的错误或警告是不可见的。
+    open: {
+      app: ['Google Chrome', 'Chrome'] // TODO:https://webpack.docschina.org/configuration/dev-server/#devserveropen
+    },
+    port: 8080,
     proxy: {
-      '/saas': {
-        // target: 'http://192.168.133.56:18098',
+      '/auth': {
         target: process.env.VUE_APP_BASE_URL,
-        protocol: 'https:',
-        changeOrigin: true
+        changeOrigin: true,
+        secure: false
       },
       '/api': {
-        // target: 'http://192.168.133.56:18098',
         target: process.env.VUE_APP_BASE_URL,
-        protocol: 'https:',
-        changeOrigin: true
+        changeOrigin: true,
+        secure: false
       }
     }
+    // proxy: [ //TODO: 不知怎么了在vue中不生效或报错：Instead, the type of "proxy" was "object".Either remove "proxy" from package.json, or make it an object.
+    //   //TODO:配置多个本地代理只需在context中新增接口api即可
+    //   //TODO:targe为接口请求地址可通过环境变量获取
+    //   {
+    //     context: ['/auth', '/api'],
+    //     target: process.env.VUE_APP_BASE_URL,
+    //     secure: false,
+    //     changeOrigin: true
+    //   }
+    // ]
   },
   chainWebpack: config => {
     if (process.env.VUE_APP_NODE_ENV !== 'development') {
@@ -117,20 +134,12 @@ module.exports = {
       .set('src', resolve('src'))
       .set('api', resolve('src/api'))
       .set('assets', resolve('src/assets'))
+      .set('lib', resolve('src/lib'))
       .set('images', resolve('src/assets/images'))
-      .set('~assets', resolve('src/assets'))
       .set('components', resolve('src/components'))
       .set('views', resolve('src/views'))
       .set('store', resolve('src/store'))
       .set('router', resolve('src/router'))
-    // 压缩图片
-    // config.module
-    //   .rule('images')
-    //   .test(/\.(png|jpe?g|gif|svg)(\?.*)?$/)
-    //   .use('image-webpack-loader')
-    //   .loader('image-webpack-loader')
-    //   .options({ bypassOnDebug: true })
-    //   .end()
     // 为了补删除换行而加的配置
     config.module
       .rule('vue')
