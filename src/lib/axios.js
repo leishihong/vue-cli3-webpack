@@ -1,7 +1,7 @@
 import qs from 'qs'
 import axios from 'axios'
 import { Notice } from 'view-design'
-import Router from 'router'
+// import Router from 'router'
 
 let version = process.env.VUE_APP_VERSION
 
