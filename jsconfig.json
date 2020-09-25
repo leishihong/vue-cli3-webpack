@@ -1,0 +1,13 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "commonjs",
+    "experimentalDecorators": false,
+    "allowSyntheticDefaultImports": false,
+    "moduleResolution": "node",
+    "resolveJsonModule": false,
+    "baseUrl": "src"
+  },
+  "exclude": ["node_modules", "dist"]
+}
