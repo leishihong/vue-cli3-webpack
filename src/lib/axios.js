@@ -3,6 +3,7 @@ import axios from 'axios'
 import { Notice } from 'view-design'
 // import Router from 'router'
 
+//TODO: package.json中的版本号
 let version = process.env.VUE_APP_VERSION
 
 let cancel = { message: '' }
