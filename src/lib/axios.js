@@ -1,5 +1,6 @@
-import qs from 'qs'
+import { stringify } from 'qs'
 import axios from 'axios'
+import Cookies from 'js-cookie'
 import { Notice } from 'view-design'
 // import Router from 'router'
 
@@ -22,11 +23,11 @@ const ROUTE_CHANGE = 'ROUTE_CHANGE'
  */
 const requestInterceptor = config => {
   // 不是login页面,验证token
-  config.headers = {
-    Authorization: localStorage.getItem('token') || '',
-    'Accept-Language': window.localStorage.getItem('language') || 'id',
+  Object.assign(config.headers, {
+    Authorization: Cookies.get('token') || '',
+    'Accept-Language': localStorage.getItem('language') || 'id',
     version: version
-  }
+  })
   config.cancelToken = new axios.CancelToken(c => (cancel = c))
   return config
 }
@@ -36,23 +37,17 @@ const requestInterceptor = config => {
  * @description 最终数据返回的信息 body响应体
  * @description 具体的code或者status根据具体业务处理返回结果
  */
-const responseInterceptor = res => {
-  if (res.data.code) {
-    const code = res.data.code.toLocaleUpperCase()
-    if (code !== 'SUCCESS' && code !== 'UPGRADE_APP' && code !== 'UPGRADE_APP') {
-      if (code === 'ERROR' && res.config.url !== '/saas/user/login') {
-        // Router.push('/no-network')
-      } else {
-        Notice.error({
-          title: 'Tips',
-          desc: `${res.data.message || 'The server is abnormal, please try again later'}`,
-          duration: 4
-        })
-      }
-      return Promise.reject(res.data)
-    }
+const responseInterceptor = response => {
+  const { data } = response
+  if (data.code && data.code !== 'SUCCESS') {
+    throw new Error(data.message)
+    // return Promise.reject(data)
   }
-  return res.data
+  if (data.code && data.code === 'SUCCESS') {
+    return data
+  }
+  console.warn('[axios:responseInterceptor]: un normalized api response', response.config.method, response.config.url)
+  return response
 }
 /**
  *
@@ -87,13 +82,11 @@ const errorInterceptor = err => {
           } else {
             // Router.push('/no-network')
           }
-          return Promise.reject(response.data)
+          throw new Error(response.data.message)
+        // return Promise.reject(response.data)
       }
     }
   }
-  // Router.push('/no-network')
-  const errorMessage = { name: 'networkError', message: 'The server is abnormal, please try again later' }
-  return Promise.reject(errorMessage)
 }
 /**---------------------------可以处理多个axios的创建实例作用于不同的api服务------------------------ */
 
@@ -106,9 +99,7 @@ const instance = axios.create({
     'Access-Control-Allow-Credentials': false,
     'Accept-Language': window.localStorage.getItem('language') || 'id'
   },
-  paramsSerializer: params => {
-    return qs.stringify(params)
-  }
+  paramsSerializer: params => stringify(params)
 })
 
 /**
@@ -122,16 +113,14 @@ const instanceIgnore = axios.create({
     Authorization: localStorage.getItem('token') || '',
     'Accept-Language': window.localStorage.getItem('language') || 'id'
   },
-  paramsSerializer: params => {
-    return qs.stringify(params)
-  }
+  paramsSerializer: params => stringify(params)
 })
 
-instance.interceptors.response.use(responseInterceptor, errorInterceptor)
 instance.interceptors.request.use(requestInterceptor)
+instance.interceptors.response.use(responseInterceptor, errorInterceptor)
 
-instanceIgnore.interceptors.response.use(responseInterceptor, errorInterceptor)
 instanceIgnore.interceptors.request.use(requestInterceptor)
+instanceIgnore.interceptors.response.use(responseInterceptor, errorInterceptor)
 
 export { instance as handle, instanceIgnore as ignore, cancel, ROUTE_CHANGE }
 export default instance

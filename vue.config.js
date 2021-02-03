@@ -101,12 +101,17 @@ module.exports = {
     },
     port: 8080,
     proxy: {
-      '/auth': {
+      '/seekersApi': {
         target: process.env.VUE_APP_BASE_URL,
         changeOrigin: true,
         secure: false
       },
       '/api': {
+        target: process.env.VUE_APP_BASE_URL,
+        changeOrigin: true,
+        secure: false
+      },
+      '/seekersApi2': {
         target: process.env.VUE_APP_BASE_URL,
         changeOrigin: true,
         secure: false

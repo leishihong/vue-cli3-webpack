@@ -10,11 +10,17 @@
 </template>
 
 <script>
-import { fetchLogin, fetchResigner } from 'api/login'
+import { handleError } from 'lib/errorHandler'
+
 export default {
-  mounted() {
-    fetchLogin({ ceshi: 123 })
-    fetchResigner({ name: 123 })
+  async mounted() {
+    try {
+      const { data } = await this.$axios.fetchGetList({ city: 'beijing' })
+      console.log(data, '获取数据')
+    } catch (error) {
+      handleError(error)
+    }
+    this.$axios.fetchResigner({ name: 123 })
   }
 }
 </script>

@@ -14,8 +14,6 @@ export default {
   components: {
     HelloWorld
   },
-  mounted() {
-    console.log('ceshi api')
-  }
+  mounted() {}
 }
 </script>
