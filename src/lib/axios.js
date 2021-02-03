@@ -91,7 +91,7 @@ const errorInterceptor = err => {
 /**---------------------------可以处理多个axios的创建实例作用于不同的api服务------------------------ */
 
 const instance = axios.create({
-  baseURL: process.env.VUE_APP_BASE_URL,
+  baseURL: '/seekersApi/' || process.env.VUE_APP_BASE_URL,
   timeout: 60000,
   withCredentials: true,
   headers: {
@@ -106,7 +106,7 @@ const instance = axios.create({
  * Axios instance ignoring error handler
  */
 const instanceIgnore = axios.create({
-  baseURL: process.env.VUE_APP_BASE_URL,
+  baseURL: '/seekersApi2/' || process.env.VUE_APP_BASE_URL,
   timeout: 60000,
   withCredentials: true,
   headers: {

@@ -2,6 +2,8 @@ const path = require('path')
 const CompressionWebpackPlugin = require('compression-webpack-plugin') // 通过CompressionWebpackPlugin插件build提供压缩
 const TerserPlugin = require('terser-webpack-plugin') // 清楚页面会遗留console.log
 const { HashedModuleIdsPlugin } = require('webpack')
+const fs = require('fs')
+const dotenv = require('dotenv')
 
 function resolve(dir) {
   return path.join(__dirname, dir)
@@ -11,6 +13,29 @@ process.env.VUE_APP_VERSION = process.env.npm_package_version
 // const productionGzip = true
 // 需要gzip压缩的文件后缀
 const productionGzipExtensions = ['js', 'css']
+
+/**
+ *
+ * @param {*} keys
+ * @description 读取proxy.env 文件配置动态写入数据
+ */
+const getProxyConfig = keys => {
+  const proxyConfig = dotenv.parse(fs.readFileSync(path.resolve(__dirname, './proxy.env')))
+  for (const key of keys) {
+    if (proxyConfig[key]) {
+      return proxyConfig[key]
+    }
+  }
+}
+const genPathRewriteFunc = (curPath, keys) => {
+  return (path, req) => {
+    const val = getProxyConfig(keys)
+    if (!val) {
+      return path
+    }
+    return path.replace(curPath, val)
+  }
+}
 
 const PROD_BUILD_PLUGIN = () => {
   let BuildPlugin = []
@@ -100,23 +125,42 @@ module.exports = {
       app: ['Google Chrome', 'Chrome'] // TODO:https://webpack.docschina.org/configuration/dev-server/#devserveropen
     },
     port: 8080,
+    // proxy: {
+    //   '/seekersApi': {
+    //     target: process.env.VUE_APP_BASE_URL,
+    //     changeOrigin: true,
+    //     secure: false
+    //   },
+    //   '/api': {
+    //     target: process.env.VUE_APP_BASE_URL,
+    //     changeOrigin: true,
+    //     secure: false
+    //   },
+    //   '/seekersApi2': {
+    //     target: process.env.VUE_APP_BASE_URL,
+    //     changeOrigin: true,
+    //     secure: false
+    //   }
+    // },
     proxy: {
       '/seekersApi': {
-        target: process.env.VUE_APP_BASE_URL,
+        target: 'https://placeholder.com/',
         changeOrigin: true,
-        secure: false
-      },
-      '/api': {
-        target: process.env.VUE_APP_BASE_URL,
-        changeOrigin: true,
-        secure: false
+        secure: false,
+        xfwd: false,
+        pathRewrite: genPathRewriteFunc('/seekersApi', ['API_PATH_REWRITE']),
+        router: () => getProxyConfig(['API_TARGET', 'TARGET'])
       },
       '/seekersApi2': {
-        target: process.env.VUE_APP_BASE_URL,
+        target: 'https://placeholder.com/',
         changeOrigin: true,
-        secure: false
+        secure: false,
+        xfwd: false,
+        pathRewrite: genPathRewriteFunc('/seekersApi2', ['API_PATH_REWRITE']),
+        router: () => getProxyConfig(['API_TARGET', 'TARGET'])
       }
     }
+
     // proxy: [ //TODO: 不知怎么了在vue中不生效或报错：Instead, the type of "proxy" was "object".Either remove "proxy" from package.json, or make it an object.
     //   //TODO:配置多个本地代理只需在context中新增接口api即可
     //   //TODO:targe为接口请求地址可通过环境变量获取
